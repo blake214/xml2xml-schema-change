@@ -1,0 +1,20 @@
+{
+  "name": "xml2xml-schema-change",
+  "version": "1.0.0",
+  "description": "Converts an xml file to a new xml file conforming to a different xsd schema",
+  "main": "src/index.js",
+  "repository": "github:blake214/xml2xml-schema-change",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "blake_kellett",
+  "license": "ISC",
+  "dependencies": {
+    "libxmljs": "^1.0.9",
+    "saxon-js": "^2.5.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0"
+  }
+}
