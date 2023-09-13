@@ -42,6 +42,8 @@ const xslt_schema = new xsltSchema(xsd_source, xsd_target, mapping_object)
 xslt_schema.init()
 .then(()=>{
     const xslt_schema_serialised = JSON.stringify(xslt_schema, null, 2)
+    // Can check what elements havent been mapped to the xsd_target
+    console.log(xslt_schema.non_mapped)
     // -> Save this xslt_schema_serialised in your database
 }).catch((err) => {
     // Handle errors
