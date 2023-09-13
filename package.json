@@ -1,6 +1,6 @@
 {
   "name": "xml2xml-schema-change",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Converts an xml file to a new xml file conforming to a different xsd schema",
   "main": "src/index.js",
   "repository": "github:blake214/xml2xml-schema-change",
