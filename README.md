@@ -1,9 +1,9 @@
 xml2xml-schema-change
 ===========
 
-Ever needed a was to convert between xml schemas, then xml2xml-schema-change could be of use
+Ever needed a way to convert between xml schemas, then xml2xml-schema-change could be of use
 
-NOTE: This package is a university project, and will unlikely be worked on in the future, so dont expect to much.
+NOTE: This package is a university project, and will unlikely be worked on in the future, so dont expect too much.
 
 Description
 ===========
@@ -13,12 +13,12 @@ The package includes two primary methods.
 
 xsltSchema: Which is used to initialise and create the conversion resources. This tool will primarily return a JSON object that can then be serialised and stored in a database for future use.
 
-xsltTransformer: Which is used to perform a transformation on a xml file and return a xml file conforming to a different schema, this method utilised the JSON object recieved by the initialisation of xsltSchema
+xsltTransformer: Which is used to perform a transformation on a xml file and return a xml file conforming to a different schema, this method utilised the JSON object received by the initialisation of xsltSchema
 
 Installation
 ============
 
-Simplest way to install `xml2xml-schema-change` is to use [npm](http://npmjs.org), just `npm
+The simplest way to install `xml2xml-schema-change` is to use [npm](http://npmjs.org), just `npm
 install xml2xml-schema-change` which will download xml2js and all dependencies.
 
 Usage
@@ -29,7 +29,7 @@ This is a simple tool to use though does require some understanding.
 Stage ONE : Initialise
 ----------------------
 
-You will initialise the xsltSchema instance with 3 primary paramiters.
+You will initialise the xsltSchema instance with 3 primary parameters.
 
 - xsd_source : This is a serialised version of the xsd that the parsed xml would be in
 - xsd_target : This is a serialised version of the xsd that you would require the returned xml to be in
@@ -42,7 +42,7 @@ const xslt_schema = new xsltSchema(xsd_source, xsd_target, mapping_object)
 xslt_schema.init()
 .then(()=>{
     const xslt_schema_serialised = JSON.stringify(xslt_schema, null, 2)
-    // Can check what elements havent been mapped to the xsd_target
+    // Can check what elements haven't been mapped to the xsd_target
     console.log(xslt_schema.non_mapped)
     // -> Save this xslt_schema_serialised in your database
 }).catch((err) => {
@@ -54,7 +54,7 @@ xslt_schema.init()
 Stage TWO : Transform 
 -------------------
 
-Once initialised, you can use the xslt_schema_serialised instance to transform an xml to the new xsd schema. You create an instance of the transformer with one paramiter:
+Once initialised, you can use the xslt_schema_serialised instance to transform a xml to the new xsd schema. You create an instance of the transformer with one paramiter:
 
 - xslt_schema_serialised : This is the stored instance from stage ONE
 
@@ -78,7 +78,7 @@ Finished
 Mapping Object
 =======
 
-The mapping object should be as the form below. It is invisioned this mapping object would be created by an UI tool.
+The mapping object should be as the form below. It is envisioned this mapping object would be created by an UI tool.
 
 ```json
 [
@@ -103,9 +103,9 @@ Below a dummy example
 ]
 ```
 
-What happens with multiple sources? Note i have only catered to concatinating strings and arrays
+What happens with multiple sources? Note i have only catered to concatenating strings and arrays
 - When a target is a string element, then the sources will be concatenated into one string.
-    - As source_1 = "hello", source_2 = "world" -> concatednation = "hello world"
+    - As source_1 = "hello", source_2 = "world" -> concatenation = "hello world"
 - When the target is a array element, or an element with maxOccurs="unbounded", then the elements from the sources will just be instances of the array
 
 Running tests, development
