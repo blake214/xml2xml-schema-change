@@ -118,6 +118,9 @@ class xsltSchema {
         if(xsltSchema.validate_mapping_syntax(mapping_object)) this.mapping_object = mapping_object
         else throw new Error("mapping_object isnt valid")
 
+        // Initialise the object that will hold the non mapped data
+        this.non_mapped
+
         // Validate the mapping object
         if(!this.validate_mapping()) throw new Error("The mapping object isnt valid against the target and source XSD's")
     }
@@ -131,7 +134,10 @@ class xsltSchema {
             - Nothing
         */
         // Create clean node tree
-        this.node_tree = await xsltSchema.create_node_tree(this.xsd_target, this.mapping_object)
+        const node_tree_structure= await xsltSchema.create_node_tree(this.xsd_target, this.mapping_object)
+        this.node_tree = node_tree_structure[0]
+        // Record the non_mapped
+        this.non_mapped = node_tree_structure[1]
         // Create xslt instance
         this.create_xslt()
     }
@@ -187,7 +193,7 @@ class xsltSchema {
         });
         return true
     }
-    static create_node_tree_structure(element, mapping, root_node = new xmlNode()) {
+    static create_node_tree_structure(element, mapping, non_mapped = [], root_node = new xmlNode()) {
         /*
         This is a recursion function that recursively creates tree nodes from xml2js format
         Usage: create_node_tree_structure(element, mapping, root_node)
@@ -199,6 +205,7 @@ class xsltSchema {
             - object: of the form -> {
                 node: xmlNode,
                 parent_type: "" -> the type of the parent of this node, in string form
+                non_mapped: [] -> an array of elements that havent been mapped from the target_xsd
             }
         */
         let parent_node_type = 'object'
@@ -216,7 +223,12 @@ class xsltSchema {
                             mapper_found = true
                         }
                     })
+                    // Here we record if there is no mapping
+                    if(!mapper_found) {
+                        if(!non_mapped.includes(element[key]['name'])) non_mapped.push(element[key]['name'])
+                    }
                     root_node_mapped = mapper_found
+                    // If the node is a end node
                     if('type' in element[key]){
                         root_node.set_type(element[key]['type'])
                     }
@@ -228,35 +240,46 @@ class xsltSchema {
             } else if(key == 'xs:element'){
                 element[key].forEach(element_tag => {
                     let new_node = new xmlNode()
-                    let child_node = this.create_node_tree_structure(element_tag, mapping, new_node)
+                    let child_node = this.create_node_tree_structure(element_tag, mapping, non_mapped, new_node)
                     // If the node isnt the last node of the tree
-                    if(child_node) {
+                    if(child_node.node) {
                         root_node.set_type(child_node.parent_type)
                         root_node.add_child(child_node.node)
                     }
+                    child_node.non_mapped.forEach(element => {
+                        if(!non_mapped.includes(element)) non_mapped.push(element)
+                    });
                 });
             } else {
                 if(element[key].length){
                     element[key].forEach(element_tag => {
                         // There should only be one element if not an 'element' tag
-                        let node = this.create_node_tree_structure(element_tag, mapping, root_node)
-                        if(node) root_node = node.node
-                        else root_node = node
+                        let node = this.create_node_tree_structure(element_tag, mapping, non_mapped, root_node)
+                        root_node = node.node
+                        node.non_mapped.forEach(element => {
+                            if(!non_mapped.includes(element)) non_mapped.push(element)
+                        });
                     });
                 } else {
                     // This directly for the first 'schema' node
-                    let node = this.create_node_tree_structure(element[key], mapping, root_node)
-                    if(node) root_node = node.node
-                    else root_node = node
+                    let node = this.create_node_tree_structure(element[key], mapping, non_mapped, root_node)
+                    root_node = node.node
+                    node.non_mapped.forEach(element => {
+                        if(!non_mapped.includes(element)) non_mapped.push(element)
+                    });
                 }
             }
         });
         // Checking if there is a mapping for the node, else we will leave it out
         if(root_node_mapped) return {
             node: root_node,
-            parent_type: parent_node_type
+            parent_type: parent_node_type,
+            non_mapped: non_mapped
         }
-        return root_node_mapped
+        return {
+            node: root_node_mapped,
+            non_mapped: non_mapped
+        }
     }
     static async create_node_tree(xml_string, mapping_object) {
         /*
@@ -271,9 +294,11 @@ class xsltSchema {
             xml2js.parseString(xml_string, (err, result) => {
                 if (err) reject(err)
                 else {
-                    const raw_node_tree = xsltSchema.create_node_tree_structure(result, mapping_object).node;
+                    const node_tree_structure = xsltSchema.create_node_tree_structure(result, mapping_object)
+                    const raw_node_tree = node_tree_structure.node;
+                    const non_mapped = node_tree_structure.non_mapped
                     const clean_node_tree = xsltSchema.clean_node_tree(raw_node_tree);
-                    resolve(clean_node_tree)
+                    resolve([clean_node_tree, non_mapped])
                 }
             });
         })
